@@ -1,0 +1,9 @@
+:root{
+    /* Color */
+    --color-text: #000000;
+    --color-primary: #576cbc;
+    --color-secondary: #19376d;
+    --color-dark: #0b2447;
+    --color-bg: #dfd6d6cb;
+    --color-gradientLeft: linear-gradient(to left, black, rgba(255, 0, 0, 0.61), black);
+}
