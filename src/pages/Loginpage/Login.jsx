@@ -15,7 +15,7 @@ function Login() {
                     <div className={`col-md-6 ${styles.rightBox}`}>
                         <div className={`align-item-center ${styles.row}`}>
                             <div className='header-text mb-4'>
-                                <p>Welcome Back</p>
+                                <h3>Welcome Back</h3>
                             </div>
                             <div className={`input-group mb-3`}>
                                 <input
