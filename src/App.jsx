@@ -3,7 +3,7 @@ function App() {
   return (
     <>
       <div className={style.App}>
-        <h1>for now type /login in the domain to see the webpage</h1>
+        <h1>For now type "/login" in the domain to see to get started</h1>
       </div>
     </>
   )
