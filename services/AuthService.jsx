@@ -5,11 +5,12 @@ const cors = require('cors');
 const app = express();
 app.use(cors());
 app.use(express.json());
+const PORT = process.env.PORT || 8081;
 
 const db = mysql.createConnection({
     host: "localhost",
     user: "root",
-    password: "89432212",
+    password: "",
     database: "misnielit"
 })
 
@@ -31,6 +32,6 @@ app.post('/signup', (req, res) => {
     })
 })
 
-app.listen(8081, () => {
+app.listen(PORT, () => {
     console.log("listening");
 })
