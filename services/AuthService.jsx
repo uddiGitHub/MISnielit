@@ -14,37 +14,65 @@ const db = mysql.createConnection({
     database: "misnielit"
 })
 
-app.post('/signup', (req, res) => {
-    const sql = "INSERT INTO nielit_account (`stud_name`,`roll_no`,`email`,`password`) VALUES (?)";
-    const values = [
-        req.body.stud_name,
-        req.body.roll_no,
-        req.body.email,
-        req.body.password
-    ]
-    db.query(sql, [values], (err, data) => {
-        if (err) {
-            console.error('Error inserting data:', err);
-            return res.json("Error");
-        }
-        console.error('inserting data:', data);
-        return res.json(data);
-    })
-})
+const bcrypt = require('bcryptjs');
+
+app.post('/signup', async (req, res) => {
+    const sql = "INSERT INTO nielit_account (`stud_name`, `roll_no`, `email`, `password`) VALUES (?, ?, ?, ?)";
+    
+    try {
+        const salt = await bcrypt.genSalt(10)
+        const hashedPassword = await bcrypt.hash(req.body.password, salt);
+
+        const values = [
+            req.body.stud_name,
+            req.body.roll_no,
+            req.body.email,
+            hashedPassword 
+        ];
+
+        db.query(sql, values, (err, result) => {
+            if (err) {
+                console.error(err);
+                res.status(500).send("Error inserting data into database");
+            } else {
+                res.status(200).send("Signup successful!");
+            }
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Error during signup");
+    }
+});
+
 app.post('/login', (req, res) => {
-    const sql = "SELECT * FROM nielit_account WHERE `email` = ? AND `password` = ?";
-    db.query(sql, [req.body.email, req.body.password], (err, data) => {
+    const sql = "SELECT * FROM nielit_account WHERE `email` = ?";
+    
+    db.query(sql, [req.body.email], async (err, data) => {
         if (err) {
-            console.error('Error inserting data:', err);
-            return res.json("Error");
+            return res.status(500).json("Error");
         }
-        if(data.length > 0){
-            return res.json("Success");
+
+        if (data.length > 0) {
+            const user = data[0];
+            console.log(user)
+            try {
+                const match = bcrypt.compare(req.body.password, user.password);
+                console.log(match)
+                if (match) {
+                    return res.status(200).json("Success");
+                } else {
+                    return res.status(401).json("Failed: Invalid email or password");
+                }
+            } catch (compareErr) {
+                return res.status(500).json("Error during password comparison");
+            }
         } else {
-            return res.json("Failed");
+            return res.status(401).json("Failed: Invalid email or password");
         }
-    })
-})
+    });
+});
+
+
 
 app.listen(PORT, () => {
     console.log("listening");
