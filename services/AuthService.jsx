@@ -31,6 +31,20 @@ app.post('/signup', (req, res) => {
         return res.json(data);
     })
 })
+app.post('/login', (req, res) => {
+    const sql = "SELECT * FROM nielit_account WHERE `email` = ? AND `password` = ?";
+    db.query(sql, [req.body.email, req.body.password], (err, data) => {
+        if (err) {
+            console.error('Error inserting data:', err);
+            return res.json("Error");
+        }
+        if(data.length > 0){
+            return res.json("Success");
+        } else {
+            return res.json("Failed");
+        }
+    })
+})
 
 app.listen(PORT, () => {
     console.log("listening");

@@ -62,7 +62,7 @@ function Signup() {
                             {errors.roll_no && <span className='text-danger'>{errors.roll_no}</span>}
                             <div className={`input-group mb-3`}>
                                 <input
-                                    type="number"
+                                    type="text"
                                     className={`form-control form-control-lg bg-light fs-6 ${styles.inputField}`}
                                     placeholder="Roll Number" onChange={handleInput} name='roll_no'
                                 />

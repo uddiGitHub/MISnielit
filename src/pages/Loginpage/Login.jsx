@@ -3,7 +3,11 @@ import styles from './Login.module.css';
 import { getImageUrl } from '../../utils';
 import Navbar from '../../components/Navbar/Navbar.jsx'
 import Validation from './LoginValidation.jsx'
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 function Login() {
+    const navigate = useNavigate();
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [values, setValues] = useState({
         email: '',
         password: ''
@@ -15,6 +19,17 @@ function Login() {
     const handleSubmit = (event) => {
         event.preventDefault();
         setErrors(Validation(values));
+        if (Object.keys(errors).length === 0) {
+            setIsSubmitting(true);
+            axios.post('http://localhost:8081/login', values)
+                .then(res => {
+                    if (res.data === "Success") {
+                        navigate('/');
+                    }else {
+                        alert("No Record Found.");
+                    }
+                })
+        }
     }
     return (
         <>
@@ -52,16 +67,7 @@ function Login() {
 
                             </div>
                             <div className={`input-group mb-5 d-flex justify-content-between`}>
-                                <div className="form-check">
-                                    <input
-                                        type="checkbox"
-                                        className="form-check-input"
-                                        id="formCheck"
-                                    />
-                                    <label htmlFor="formCheck" className="form-check-label text-secondary">
-                                        <small>Remember Me</small>
-                                    </label>
-                                </div>
+                                <div></div>
                                 <div className={styles.forgot}>
                                     <small><a href="#">Forgot Password?</a></small>
                                 </div>
