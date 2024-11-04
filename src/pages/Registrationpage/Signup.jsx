@@ -36,7 +36,11 @@ function Signup() {
                 })
                 .catch(err => {
                     setIsSubmitting(false);
-                    console.log(err);
+                    if (err.response && err.response.status === 400) {
+                        alert(err.response.data);
+                    } else {
+                        alert("An error occurred during signup. Please try again.");
+                    }
                 });
         }
     };

@@ -17,32 +17,43 @@ const db = mysql.createConnection({
 const bcrypt = require('bcryptjs');
 
 app.post('/signup', async (req, res) => {
-    const sql = "INSERT INTO nielit_account (`stud_name`, `roll_no`, `email`, `password`) VALUES (?, ?, ?, ?)";
+    const checkSql = "SELECT * FROM nielit_account WHERE email = ? OR roll_no = ?";
     
-    try {
-        const salt = await bcrypt.genSalt(10)
-        const hashedPassword = await bcrypt.hash(req.body.password, salt);
+    db.query(checkSql, [req.body.email, req.body.roll_no], async (err, results) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).send("Database query error");
+        }
+        if (results.length > 0) {
+            return res.status(400).send("Email or Roll Number already exists");
+        }
+        const sql = "INSERT INTO nielit_account (`stud_name`, `roll_no`, `email`, `password`) VALUES (?, ?, ?, ?)";
 
-        const values = [
-            req.body.stud_name,
-            req.body.roll_no,
-            req.body.email,
-            hashedPassword 
-        ];
+        try {
+            const salt = await bcrypt.genSalt(10);
+            const hashedPassword = await bcrypt.hash(req.body.password, salt);
 
-        db.query(sql, values, (err, result) => {
-            if (err) {
-                console.error(err);
-                res.status(500).send("Error inserting data into database");
-            } else {
+            const values = [
+                req.body.stud_name,
+                req.body.roll_no,
+                req.body.email,
+                hashedPassword 
+            ];
+
+            db.query(sql, values, (err, result) => {
+                if (err) {
+                    console.error(err);
+                    return res.status(500).send("Error inserting data into database");
+                }
                 res.status(200).send("Signup successful!");
-            }
-        });
-    } catch (err) {
-        console.error(err);
-        res.status(500).send("Error during signup");
-    }
+            });
+        } catch (err) {
+            console.error(err);
+            res.status(500).send("Error during signup");
+        }
+    });
 });
+
 
 app.post('/login', (req, res) => {
     const sql = "SELECT * FROM nielit_account WHERE `email` = ?";
