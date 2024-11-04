@@ -54,11 +54,13 @@ app.post('/login', (req, res) => {
 
         if (data.length > 0) {
             const user = data[0];
-            console.log(user)
+            console.log(user.password)
+            console.log(req.body.password)
             try {
-                const match = bcrypt.compare(req.body.password, user.password);
+                const match = await bcrypt.compare(req.body.password, user.password);
                 console.log(match)
                 if (match) {
+                    console.log(match)
                     return res.status(200).json("Success");
                 } else {
                     return res.status(401).json("Failed: Invalid email or password");
