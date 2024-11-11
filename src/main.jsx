@@ -4,6 +4,7 @@ import App from './App.jsx'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './index.css'
 import Login from './pages/Loginpage/Login.jsx'
+import ForgotPass from './pages/Loginpage/ForgotPass.jsx'
 
 import {
   createBrowserRouter,
@@ -25,6 +26,10 @@ const router = createBrowserRouter([
     path: "signup",
     element: <Signup />,
   },
+  {
+    path: "forgot-password",
+    element: <ForgotPass />
+  }
 ]);
 
 

@@ -1,10 +1,16 @@
 import React, { useState } from 'react';
+import { createContext } from "react";
 import styles from './Login.module.css';
 import { getImageUrl } from '../../utils';
 import Navbar from '../../components/Navbar/Navbar.jsx'
 import Validation from './LoginValidation.jsx'
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+// import { ForgotPass } from './forgotPass.jsx';
+// import Reset from './Reset.jsx'
+
+export const RecoveryContext = createContext();
+
 function Login() {
     const navigate = useNavigate();
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -14,7 +20,11 @@ function Login() {
     })
     const [errors, setErrors] = useState({})
     const handleInput = (event) => {
-        setValues(prev => ({ ...prev, [event.target.name]: event.target.value }))
+        const { name, value } = event.target;
+        setValues(prev => ({ ...prev, [event.target.name]: event.target.value }));
+        if (name === 'email') {
+            setEmail(value);
+        }
     }
     const handleSubmit = (event) => {
         event.preventDefault();
@@ -25,14 +35,52 @@ function Login() {
                 .then(res => {
                     if (res.data === "Success") {
                         navigate('/');
-                    }else {
+                    } else {
                         alert("No Record Found.");
                     }
                 })
+                .catch(error => {
+                    console.error("There was an error logging in:", error);
+                })
+                .finally(() => {
+                    setIsSubmitting(false);
+                });
         }
+    }
+    //forgot password----otp functionality
+    const [page, setPage] = useState("forgot-password");
+    const [email, setEmail] = useState();
+    const [otp, setOTP] = useState();
+
+    //function for navigation component
+    // function NavigateComponents() {
+    //     if (page === "forgot-password") return <ForgotPass />;
+    //     if (page === "reset") return <Reset />;
+    //     // return <Recovered />;
+    // }
+    function navigateToOtp() {
+        if (email) {
+            const OTP = Math.floor(Math.random() * 9000 + 1000);
+            console.log(OTP);
+            setOTP(OTP);
+
+            axios
+                .post("http://localhost:8081/send_recovery_email", {
+                    OTP,
+                    recipient_email: email,
+                })
+                .then(() => setPage("otp"))
+                .catch(console.log);
+            return;
+        }
+        return alert("Please enter your email");
     }
     return (
         <>
+            <RecoveryContext.Provider
+                value={{ page, setPage, otp, setOTP, email, setEmail}}
+
+            ></RecoveryContext.Provider>
             <Navbar />
             <div className={`container d-flex justify-content-center align-items-center min-vh-100 ${styles.customClass}`}>
                 <div className={`row border rounded-5 p-3 bg-white shadow ${styles.boxArea}`}>
@@ -69,11 +117,20 @@ function Login() {
                             <div className={`input-group mb-5 d-flex justify-content-between`}>
                                 <div></div>
                                 <div className={styles.forgot}>
-                                    <small><a href="#">Forgot Password?</a></small>
+                                    <small><a href="/forgot-password"
+                                        onClick={() => navigateToOtp()}>Forgot Password?</a></small>
                                 </div>
                             </div>
                             <div className="input-group mb-3">
-                                <button type='submit' className="btn btn-lg btn-primary w-100 fs-6">Login</button>
+                                <button
+                                    type="submit"
+                                    className="btn btn-lg btn-primary w-100 fs-6"
+                                    disabled={isSubmitting && Object.keys(errors).length === 0}
+                                >
+                                    {isSubmitting ? 'Submitting...' : 'Login'}
+                                </button>
+
+
                             </div>
                             <div className="row">
                                 <small>
