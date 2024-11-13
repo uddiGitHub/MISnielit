@@ -5,6 +5,7 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import './index.css'
 import Login from './pages/Loginpage/Login.jsx'
 import ForgotPass from './pages/Loginpage/ForgotPass.jsx'
+import StudDashboard from './pages/StudDashboard/StudDashboard.jsx'
 
 import {
   createBrowserRouter,
@@ -29,6 +30,10 @@ const router = createBrowserRouter([
   {
     path: "forgot-password",
     element: <ForgotPass />
+  },
+  {
+    path: "student-dashboard",
+    element: <StudDashboard />
   }
 ]);
 
