@@ -6,7 +6,7 @@ import './index.css'
 import Login from './pages/Loginpage/Login.jsx'
 import ForgotPass from './pages/Loginpage/ForgotPass.jsx'
 import StudDashboard from './pages/StudDashboard/StudDashboard.jsx'
-
+import AdminDasboard from './pages/Admin/AdminDasboard.jsx'
 import {
   createBrowserRouter,
   RouterProvider,
@@ -34,6 +34,10 @@ const router = createBrowserRouter([
   {
     path: "student-dashboard",
     element: <StudDashboard />
+  },
+  {
+    path: "admin-dashboard",
+    element: <AdminDasboard />
   }
 ]);
 
