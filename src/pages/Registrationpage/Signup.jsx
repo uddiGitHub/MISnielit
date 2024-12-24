@@ -47,7 +47,6 @@ function Signup() {
 
     return (
         <>
-            <Navbar />
             <div className={`container d-flex justify-content-center align-items-center min-vh-100 ${styles.customClass}`}>
                 <div className={`row border rounded-5 p-3 bg-white shadow ${styles.boxArea}`}>
                     <form action="" onSubmit={handleSubmit} className={`col-md-6 ${styles.rightBox}`}>

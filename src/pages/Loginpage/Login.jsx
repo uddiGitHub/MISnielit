@@ -1,13 +1,11 @@
-import React, { useState } from 'react';
-import { createContext } from "react";
+import React, { useState, createContext } from 'react';
 import styles from './Login.module.css';
 import { getImageUrl } from '../../utils';
-import Navbar from '../../components/Navbar/Navbar.jsx'
-import Validation from './LoginValidation.jsx'
+import Navbar from '../../components/Navbar/Navbar.jsx';
+import Validation from './LoginValidation.jsx';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-// import { ForgotPass } from './forgotPass.jsx';
-// import Reset from './Reset.jsx'
+import ForgotPass from './ForgotPass.jsx';
 
 export const RecoveryContext = createContext();
 
@@ -17,15 +15,18 @@ function Login() {
     const [values, setValues] = useState({
         email: '',
         password: ''
-    })
-    const [errors, setErrors] = useState({})
+    });
+    const [errors, setErrors] = useState({});
+    const [page, setPage] = useState("login");
+    const [email, setEmail] = useState("");
+    const [otp, setOTP] = useState(null);
+
     const handleInput = (event) => {
         const { name, value } = event.target;
-        setValues(prev => ({ ...prev, [event.target.name]: event.target.value }));
-        if (name === 'email') {
-            setEmail(value);
-        }
-    }
+        setValues((prev) => ({ ...prev, [name]: value }));
+        if (name === 'email') setEmail(value);
+    };
+
     const handleSubmit = (event) => {
         event.preventDefault();
         setErrors(Validation(values));
@@ -46,19 +47,9 @@ function Login() {
                     setIsSubmitting(false);
                 });
         }
-    }
-    //forgot password----otp functionality
-    const [page, setPage] = useState("forgot-password");
-    const [email, setEmail] = useState();
-    const [otp, setOTP] = useState();
+    };
 
-    //function for navigation component
-    // function NavigateComponents() {
-    //     if (page === "forgot-password") return <ForgotPass />;
-    //     if (page === "reset") return <Reset />;
-    //     // return <Recovered />;
-    // }
-    function navigateToOtp() {
+    const navigateToOtp = () => {
         if (email) {
             const OTP = Math.floor(Math.random() * 9000 + 1000);
             console.log(OTP);
@@ -69,80 +60,74 @@ function Login() {
                     OTP,
                     recipient_email: email,
                 })
-                .then(() => setPage("otp"))
+                .then(() => setPage("forgot-password"))
                 .catch(console.log);
             return;
         }
         return alert("Please enter your email");
-    }
+    };
+
     return (
-        <>
-            <RecoveryContext.Provider
-                value={{ page, setPage, otp, setOTP, email, setEmail}}
-
-            ></RecoveryContext.Provider>
-            <Navbar />
+        <RecoveryContext.Provider value={{ page, setPage, otp, setOTP, email, setEmail }}>
             <div className={`container d-flex justify-content-center align-items-center min-vh-100 ${styles.customClass}`}>
-                <div className={`row border rounded-5 p-3 bg-white shadow ${styles.boxArea}`}>
-                    <div className={`col-md-6 rounded-4 d-flex justify-content-center align-items-center flex-column ${styles.leftBox}`} style={{ background: '#79add8' }}>
-                        <div className={`mb-3 ${styles.featuredImage}`}>
-                            <img src={getImageUrl("login/cover.png")} className='img-fluid'></img>
+                {page === "login" && (
+                    <div className={`row border rounded-5 p-3 bg-white shadow ${styles.boxArea}`}>
+                        <div className={`col-md-6 rounded-4 d-flex justify-content-center align-items-center flex-column ${styles.leftBox}`} style={{ background: '#79add8' }}>
+                            <div className={`mb-3 ${styles.featuredImage}`}>
+                                <img src={getImageUrl("login/cover.png")} className='img-fluid' alt="Cover"></img>
+                            </div>
+                            <p className={`text-white fs-5 ${styles.paraClass}`} style={{ fontWeight: 600 }}>Your Journey Starts Here</p>
                         </div>
-                        <p className={`text-white fs-5 ${styles.paraClass}`} style={{ fontWeight: 600 }}>Your Journey Starts Here</p>
-                    </div>
-                    <form action="" onSubmit={handleSubmit} className={`col-md-6 ${styles.rightBox}`}>
-                        <div className={`align-item-center ${styles.row}`}>
-
-                            <div className='header-text mb-4'>
-                                <h3>Welcome Back</h3>
-                            </div>
-                            {errors.email && <span className='text-danger'>{errors.email}</span>}
-                            <div className={`input-group mb-3`}>
-                                <input
-                                    type="email"
-                                    className={`form-control form-control-lg bg-light fs-6 ${styles.inputField}`}
-                                    placeholder="Email address" onChange={handleInput} name='email'
-                                ></input>
-
-                            </div>
-                            {errors.password && <span className='text-danger'>{errors.password}</span>}
-                            <div className={`input-group mb-1`}>
-                                <input
-                                    type="password"
-                                    className={`form-control form-control-lg bg-light fs-6 ${styles.inputField}`}
-                                    placeholder="Password" onChange={handleInput} name='password'
-                                ></input>
-
-                            </div>
-                            <div className={`input-group mb-5 d-flex justify-content-between`}>
-                                <div></div>
-                                <div className={styles.forgot}>
-                                    <small><a href="/forgot-password"
-                                        onClick={() => navigateToOtp()}>Forgot Password?</a></small>
+                        <form action="" onSubmit={handleSubmit} className={`col-md-6 ${styles.rightBox}`}>
+                            <div className={`align-item-center ${styles.row}`}>
+                                <div className='header-text mb-4'>
+                                    <h3>Welcome Back</h3>
+                                </div>
+                                {errors.email && <span className='text-danger'>{errors.email}</span>}
+                                <div className={`input-group mb-3`}>
+                                    <input
+                                        type="email"
+                                        className={`form-control form-control-lg bg-light fs-6 ${styles.inputField}`}
+                                        placeholder="Email address" onChange={handleInput} name='email'
+                                    ></input>
+                                </div>
+                                {errors.password && <span className='text-danger'>{errors.password}</span>}
+                                <div className={`input-group mb-1`}>
+                                    <input
+                                        type="password"
+                                        className={`form-control form-control-lg bg-light fs-6 ${styles.inputField}`}
+                                        placeholder="Password" onChange={handleInput} name='password'
+                                    ></input>
+                                </div>
+                                <div className={`input-group mb-5 d-flex justify-content-between`}>
+                                    <div></div>
+                                    <div className={styles.forgot}>
+                                        <small><a href="#forgot-password"
+                                            onClick={navigateToOtp}>Forgot Password?</a></small>
+                                    </div>
+                                </div>
+                                <div className="input-group mb-3">
+                                    <button
+                                        type="submit"
+                                        className="btn btn-lg btn-primary w-100 fs-6"
+                                        disabled={isSubmitting && Object.keys(errors).length === 0}
+                                    >
+                                        {isSubmitting ? 'Submitting...' : 'Login'}
+                                    </button>
+                                </div>
+                                <div className="row">
+                                    <small>
+                                        Don't have an account? <a href="/signup">Sign Up</a>
+                                    </small>
                                 </div>
                             </div>
-                            <div className="input-group mb-3">
-                                <button
-                                    type="submit"
-                                    className="btn btn-lg btn-primary w-100 fs-6"
-                                    disabled={isSubmitting && Object.keys(errors).length === 0}
-                                >
-                                    {isSubmitting ? 'Submitting...' : 'Login'}
-                                </button>
-
-
-                            </div>
-                            <div className="row">
-                                <small>
-                                    Don't have an account? <a href="/signup">Sign Up</a>
-                                </small>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div >
-        </>
-    )
+                        </form>
+                    </div>
+                )}
+                {page === "forgot-password" && <ForgotPass />}
+            </div>
+        </RecoveryContext.Provider>
+    );
 }
 
-export default Login
+export default Login;
