@@ -220,6 +220,66 @@ app.post("/send_recovery_email", (req, res) => {
         .catch((error) => res.status(500).send(error.message));
 });
 
+//Email checking
+app.post("/check_email", (req, res) => {
+    const { email } = req.body;
+    
+    if (!email) {
+        return res.status(400).json({ error: "Email is required" });
+    }
+    const sql = "SELECT COUNT(*) AS count FROM nielit_account WHERE email = ?";
+
+    db.query(sql, [email], (err, results) => {
+        if (err) {
+            console.error("Error checking email:", err);
+            return res.status(500).json({ error: "Internal server error" });
+        }
+        const count = results[0].count;
+        if (count > 0) {
+            res.json({ exists: true });
+        } else {
+            res.json({ exists: false });
+        }
+    });
+});
+
+//Password Reset Service
+app.post("/reset_password", async (req, res) => {
+    const { email, newPassword } = req.body;
+
+    if (!email || !newPassword) {
+        return res.status(400).json({ error: "Email and new password are required." });
+    }
+
+    const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (!passwordPattern.test(newPassword)) {
+        return res.status(400).json({ error: "Password does not meet the required criteria." });
+    }
+
+    try {
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+        const sql = "UPDATE nielit_account SET password = ? WHERE email = ?";
+        db.query(sql, [hashedPassword, email], (err, result) => {
+            if (err) {
+                console.error("Error updating password:", err);
+                return res.status(500).json({ error: "Internal server error." });
+            }
+
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ error: "Email not found." });
+            }
+
+            res.status(200).json({ message: "Password updated successfully." });
+        });
+    } catch (error) {
+        console.error("Error hashing password:", error);
+        res.status(500).json({ error: "Internal server error." });
+    }
+});
+
+
 
 app.listen(PORT, () => {
     console.log("listening");

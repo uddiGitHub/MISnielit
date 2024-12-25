@@ -47,7 +47,7 @@ function ForgotPass() {
   }, [disable]);
 
   return (
-    <div className={`d-flex justify-content-center align-items-center min-vh-100 bg-light`}>
+    <div className={`d-flex justify-content-center align-items-center min-vh-100`}>
       <div className={`row border rounded-5 p-4 bg-white shadow-lg w-100 max-w-lg`}>
         <div className={`col-12 text-center mb-4`}>
           <h1 className={`fw-bold text-dark`}>Email Verification</h1>

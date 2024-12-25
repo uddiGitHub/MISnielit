@@ -1,16 +1,18 @@
-import React, { useState, createContext } from 'react';
+import React, { useState, createContext,useEffect  } from 'react';
 import styles from './Login.module.css';
 import { getImageUrl } from '../../utils';
-import Navbar from '../../components/Navbar/Navbar.jsx';
 import Validation from './LoginValidation.jsx';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import ForgotPass from './ForgotPass.jsx';
+import Reset from './Reset.jsx'
+import { Message } from '@mui/icons-material';
 
 export const RecoveryContext = createContext();
 
 function Login() {
     const navigate = useNavigate();
+    const location = useLocation();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [values, setValues] = useState({
         email: '',
@@ -20,6 +22,15 @@ function Login() {
     const [page, setPage] = useState("login");
     const [email, setEmail] = useState("");
     const [otp, setOTP] = useState(null);
+
+    useEffect(() => {
+        const pathToPageMap = {
+            "/": "login",
+            "/forgot-password": "forgot-password",
+            "/reset": "reset",
+        };
+        setPage(pathToPageMap[location.pathname] || "login");
+    }, [location.pathname]);
 
     const handleInput = (event) => {
         const { name, value } = event.target;
@@ -41,7 +52,9 @@ function Login() {
                     }
                 })
                 .catch(error => {
+                    alert("Incorrect password!")
                     console.error("There was an error logging in:", error);
+                    
                 })
                 .finally(() => {
                     setIsSubmitting(false);
@@ -51,21 +64,34 @@ function Login() {
 
     const navigateToOtp = () => {
         if (email) {
-            const OTP = Math.floor(Math.random() * 9000 + 1000);
-            console.log(OTP);
-            setOTP(OTP);
-
             axios
-                .post("http://localhost:8081/send_recovery_email", {
-                    OTP,
-                    recipient_email: email,
+                .post("http://localhost:8081/check_email", { email })
+                .then((response) => {
+                    if (response.data.exists) {
+                        const OTP = Math.floor(Math.random() * 9000 + 1000);
+                        console.log(OTP);
+                        setOTP(OTP);
+    
+                        axios
+                            .post("http://localhost:8081/send_recovery_email", {
+                                OTP,
+                                recipient_email: email,
+                            })
+                            .then(() => setPage("forgot-password"))
+                            .catch(console.log);
+                    } else {
+                        alert("The provided email is not registered in our system.");
+                    }
                 })
-                .then(() => setPage("forgot-password"))
-                .catch(console.log);
-            return;
+                .catch((error) => {
+                    console.error("Error checking email:", error);
+                    alert("An error occurred while verifying the email. Please try again.");
+                });
+        } else {
+            alert("Please enter your email.");
         }
-        return alert("Please enter your email");
     };
+    
 
     return (
         <RecoveryContext.Provider value={{ page, setPage, otp, setOTP, email, setEmail }}>
@@ -125,6 +151,8 @@ function Login() {
                     </div>
                 )}
                 {page === "forgot-password" && <ForgotPass />}
+                {page === "reset" && <Reset />}
+                
             </div>
         </RecoveryContext.Provider>
     );
